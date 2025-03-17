@@ -46,6 +46,13 @@ find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(std_srvs REQUIRED)
+find_package(cartographer_ros)
+find_package(nav2_bringup)
+find_package(tf2 REQUIRED)
+find_package(tf2_ros REQUIRED)
+find_package(geometry_msgs REQUIRED)
+find_package(nav_msgs REQUIRED)
+find_package(micro-ROS-Agent)
 
 ################################################################################
 # Build
@@ -62,6 +69,8 @@ ament_target_dependencies(rplidar_node
   rclcpp
   std_srvs
   sensor_msgs
+  cartographer_ros
+  nav2_bringup
 )
 
 add_executable(rplidar_composition src/rplidar_node.cpp ${RPLIDAR_SDK_SRC})
@@ -69,6 +78,8 @@ ament_target_dependencies(rplidar_composition
   rclcpp
   std_srvs
   sensor_msgs
+  cartographer_ros
+  nav2_bringup
 )
 
 add_executable(rplidar_client src/rplidar_client.cpp)
@@ -77,15 +88,31 @@ ament_target_dependencies(rplidar_client
   std_srvs
   sensor_msgs
 )
+
+
+add_executable(odom2tf src/odom2tf.cpp)
+ament_target_dependencies(odom2tf
+  rclcpp tf2  nav_msgs  geometry_msgs  tf2_ros
+)
+install(TARGETS odom2tf
+  DESTINATION lib/${PROJECT_NAME})
+
+# add_executable(odom_sub_node src/odom_sub_node.cpp)
+# ament_target_dependencies(odom_sub_node 
+#   rclcpp
+#   std_srvs
+#   sensor_msgs
+# )
+
 ################################################################################
 # Install
 ################################################################################
-install(DIRECTORY launch rviz
+install(DIRECTORY launch rviz description map
   DESTINATION share/${PROJECT_NAME}
 )
 
 install(
-  TARGETS rplidar_node rplidar_composition rplidar_client
+  TARGETS rplidar_node rplidar_composition rplidar_client odom2tf 
   RUNTIME DESTINATION lib/${PROJECT_NAME}
 )
 
@@ -95,5 +122,7 @@ install(
 ament_export_dependencies(rclcpp)
 ament_export_dependencies(std_msgs)
 ament_export_dependencies(sensor_msgs)
+ament_export_dependencies(cartographer_ros)
+ament_export_dependencies(nav2_bringup)
 ament_export_include_directories(include)
 ament_package()

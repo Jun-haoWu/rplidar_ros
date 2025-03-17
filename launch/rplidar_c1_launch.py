@@ -1,11 +1,14 @@
 #!/usr/bin/env python3
 
 import os
-
+import launch
+import launch_ros
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument
 from launch.actions import LogInfo
+from launch.actions import IncludeLaunchDescription
+from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
 
@@ -18,6 +21,13 @@ def generate_launch_description():
     inverted = LaunchConfiguration('inverted', default='false')
     angle_compensate = LaunchConfiguration('angle_compensate', default='true')
     scan_mode = LaunchConfiguration('scan_mode', default='Standard')
+
+    rviz_config_path = os.path.join(
+            get_package_share_directory('rplidar_ros'),
+            'rviz',
+            'rplidar_ros.rviz',
+            )
+    
 
     return LaunchDescription([
         DeclareLaunchArgument(
@@ -55,6 +65,7 @@ def generate_launch_description():
             default_value=scan_mode,
             description='Specifying scan mode of lidar'),
 
+        
         Node(
             package='rplidar_ros',
             executable='rplidar_node',
@@ -62,10 +73,20 @@ def generate_launch_description():
             parameters=[{'channel_type':channel_type,
                          'serial_port': serial_port,
                          'serial_baudrate': serial_baudrate,
-                         'frame_id': frame_id,
+                         'frame_id': frame_id, 
                          'inverted': inverted,
                          'angle_compensate': angle_compensate,
-                         'scan_mode': scan_mode}],
+                           'scan_mode': scan_mode
+                         }],
             output='screen'),
+
+        Node(
+            package='rviz2',
+            executable='rviz2',
+            name='rviz2',
+            arguments=['-d', rviz_config_path],
+            output='screen'),
+   
+
     ])
 
